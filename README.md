@@ -1,4 +1,4 @@
-# React + Vite,  Dynamic Form with Redux
+# React + Vite + Redux  Dynamic Form
 
 A modern React application featuring a dynamic form with Redux state management, form validation, and responsive design.
 
@@ -29,9 +29,8 @@ The project uses the following main dependencies:
 
 ## Installation
 
-1. Clone the repository:
+1. After cloning the repository:
 ```bash
-git clone <your-repository-url>
 cd dynamicForm
 ```
 
