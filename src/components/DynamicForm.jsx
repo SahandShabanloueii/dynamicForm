@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { useDispatch, useSelector } from 'react-redux'
+import { setFormData, setLoading, setError, setSuccess, resetForm } from '../redux/formSlice'
 
 const formConfig = {
     title: 'Advanced Dynamic Form',
@@ -81,27 +83,34 @@ function CheckboxField({ field, control, errors }) {
 
 export default function DynamicForm({ config = formConfig }) {
   const { register, handleSubmit, control, formState: { errors }, reset } = useForm();
-  const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const dispatch = useDispatch();
+  const { loading, error, success } = useSelector((state) => state.form);
+
+  // Reset handler
+  const handleReset = () => {
+    reset();
+    dispatch(resetForm());
+  };
 
   // Submit handler
   async function onSubmit(formData) {
-    setLoading(true);
-    setSubmitError(null);
+    dispatch(setLoading(true));
+    dispatch(setError(null));
     try {
-      // console.log(formData);
       const res = await fetch(config.submitUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
       if (!res.ok) throw new Error('Something went wrong');
+      dispatch(setSuccess(true));
+      dispatch(setFormData(formData));
       alert('Form submitted successfully!');
-      reset();
+      handleReset();
     } catch (error) {
-      setSubmitError(error.message);
+      dispatch(setError(error.message));
     } finally {
-      setLoading(false);
+      dispatch(setLoading(false));
     }
   }
 
@@ -122,15 +131,24 @@ export default function DynamicForm({ config = formConfig }) {
           </div>
         ))}
 
-        {submitError && <p className="text-red-600 text-sm mb-4">{submitError}</p>}
+        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          {loading ? 'Submitting...' : 'Submit'}
-        </button>
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            {loading ? 'Submitting...' : 'Submit'}
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="flex-1 py-2 px-4 bg-gray-200 text-gray-800 font-semibold rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+          >
+            Reset
+          </button>
+        </div>
       </form>
     </div>
   );
